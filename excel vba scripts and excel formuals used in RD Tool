@@ -1,0 +1,281 @@
+***********************************************************
+
+Private Sub CommandButton1_Click()
+
+    Call Crt_Accs_in_comma_str
+
+End Sub
+
+Private Sub CommandButton2_Click()
+
+    Call Gen_aslass_for_accs
+
+End Sub
+
+Private Sub CommandButton3_Click()
+
+    Call Save_all
+
+End Sub
+
+Private Sub CommandButton4_Click()
+
+    Call Clr_all_cont
+
+End Sub
+
+********************************************************
+
+Sub Crt_Accs_in_comma_str()
+
+    Dim chkCell As Range
+    
+    Set chkCell = Range("F1")
+    
+    If chkCell > 20000 Then
+    
+        MsgBox ("The total amount has crossed the limit of 20000, Please select the entries accordingly and click on RUN again")
+
+    Else
+
+        Dim inCell As Range
+        Set inCell = Range("$A$2:$A$424")
+        Dim Rng As Range
+        
+        tempStr = ""
+        outStr = ""
+              
+        Dim outCell As Range
+        Set outCell = Range("F15")
+                
+        For Each Rng In inCell
+            
+            If Rng.Value <> "" Then
+                
+                If outStr = "" Then
+                
+                    If Len(Rng.Value) < 10 Then
+                        
+                        tempStr = "0" & Rng.Value
+                    
+                    Else
+                        
+                        tempStr = Rng.Value
+                    
+                    End If
+                    
+                    outStr = tempStr
+                    
+                Else
+                
+                     If Len(Rng.Value) < 10 Then
+                        
+                        tempStr = "0" & Rng.Value
+                    
+                    Else
+                        
+                        tempStr = Rng.Value
+                        
+                    End If
+                    
+                    outStr = outStr & "," & tempStr
+                
+                End If
+            
+            End If
+        
+        Next
+        
+            outCell = outStr
+            
+        MsgBox ("The input data is processed")
+                
+    End If
+            
+End Sub
+
+        
+***************************************************************
+
+Sub Gen_aslass_for_accs()
+
+    Worksheets("ASLASS of Accounts").Range("$A$2:$A$236") = ""
+
+    Dim outStr As Range
+    Set outStr = Range("F15")
+  
+    Dim loop_Limit As Integer
+    loop_Limit = Application.WorksheetFunction.CountA(Range("$A$2:$A$424"))
+        
+    Dim sortCell As Range
+    Set sortCell = Worksheets("ASLASS of Accounts").Range("$A$2:$A$236")
+    Dim Srt As Range
+        
+    Dim Counter As Integer
+    Counter = 1
+    
+    Dim Looop As Integer
+    Looop = 1
+    
+    For Each Srt In sortCell
+    
+        If Looop <= loop_Limit Then
+   
+            Srt = Mid(outStr, Counter, 10)
+        
+        End If
+              
+        Counter = Counter + 11
+        
+        Looop = Looop + 1
+                    
+    Next
+    
+    Worksheets("ASLASS of Accounts").Range("$A$2:$A$236").RemoveDuplicates Columns:=Array(1), Header:=xlNo
+    
+    Worksheets("ASLASS of Accounts").Range("$A$2:$A$236").Sort Key1:=Worksheets("ASLASS of Accounts").Range("$A$2:$A$236"), Order1:=xlAscending, Orientation:=xlTopToBottom, Header:=xlNo
+         
+    Worksheets("ASLASS of Accounts").Range("$A$2:$A$236").HorizontalAlignment = xlLeft
+    
+    Worksheets("ASLASS of Accounts").Range("$A$2:$A$236").Borders.LineStyle = xlContinuous
+    
+    Worksheets("ASLASS of Accounts").Range("$A$2:$A$236").Borders.Weight = xlThin
+    
+    Worksheets("ASLASS of Accounts").Range("$A$2:$A$236").Borders.ColorIndex = 0
+    
+    Worksheets("ASLASS of Accounts").Range("$A$2:$A$236").Borders.TintAndShade = 0
+    
+    MsgBox ("The aslass mapping is generated")
+    
+End Sub
+
+************************************************
+
+Sub Save_all()
+
+    Dim StrDate As String
+    Dim folder As String
+                
+    StrDate = Format(Now, "yyyy-mm-dd hh-mm-ss")
+
+    folder = "C:\Users\srini\Desktop\Postal RD\notepads\"
+    
+    '*********************************************************
+    
+    Dim fileName1 As String
+    
+    fileName1 = "Output" & StrDate & ".txt"
+    
+    Open folder & fileName1 For Output As #1
+      
+    Range("F15").Select
+    
+    Print #1, ActiveCell.Value
+    
+    Close (1)
+   
+    MsgBox ("The output data is copied at " & folder & fileName1)
+    
+    '*********************************************************
+    
+    Dim fileName2 As String
+       
+    fileName2 = "ASLASS " & StrDate & ".txt"
+    
+    Open folder & fileName2 For Output As #2
+    
+    Dim r1 As Integer
+    Dim c1 As Integer
+    
+    Dim LR As Long
+    Dim LC As Long
+     
+    fileData1 = ""
+       
+    Worksheets("ASLASS of Accounts").Activate
+    LR = ActiveSheet.UsedRange.SpecialCells(xlCellTypeLastCell).row
+    LC = ActiveSheet.UsedRange.SpecialCells(xlCellTypeLastCell).Column
+    
+    '*********************************************************
+       
+    For r1 = 1 To LR
+    
+        For c1 = 2 To LC
+        
+            If c1 = LC Then
+            
+                fileData1 = fileData1 & CStr(Cells(r1, c1))
+                
+            Else
+            
+                fileData1 = fileData1 & CStr(Cells(r1, c1)) & vbTab
+                                           
+            End If
+           
+        Next c1
+        
+        Print #2, fileData1
+        
+        fileData1 = ""
+      
+    Next r1
+    
+    '*********************************************************
+    
+    Close (2)
+   
+    MsgBox ("The ASLASS data is copied at " & folder & fileName2)
+    
+End Sub
+
+*************************************************************
+
+Sub Clr_all_cont()
+
+    Worksheets("Worksheet").Range("$A$2:$A$236,$F$15") = ""
+    
+    Worksheets("ASLASS of Accounts").Range("$A$2:$A$236") = ""
+    
+    MsgBox ("All the contents of all the sheets are cleared")
+    
+End Sub
+
+*************************************************************
+
+Worksheet
+
+
+=IF(A2="","",VLOOKUP(A2,$'Master List of Accounts'.$A$3:$D$1048576,2,0))
+
+=IF(A2="","",VLOOKUP(A2,$'Master List of Accounts'.$A$3:$D$1048576,3,0))
+
+=IF(A2="","",VLOOKUP(A2,$'Master List of Accounts'.$A$3:$D$1048576,4,0))
+
+=SUM(C2:C401)
+
+*************************************************************
+
+ASLASS of Accounts
+
+
+=IF(A2="","",(IF(LEN(A2)<10,CONCATENATE("0",A2),A2)))
+
+=(IF(A2="","",VLOOKUP(A2,$'Master List of Accounts'.$A$3:$D$1048576,2,0)))&REPT(" ",($'Master List of Accounts'.B1)-LEN(IF(A2="","",VLOOKUP(A2,$'Master List of Accounts'.$A$3:$D$1048576,2,0))))
+
+=IF(A2="","",VLOOKUP(A2,$'Master List of Accounts'.$A$3:$D$1048576,3,0))
+
+=IF(A2="","",VLOOKUP(A2,$'Master List of Accounts'.$A$3:$D$1048576,4,0))
+
+*************************************************************
+
+Master List of Accounts
+
+{=MAX(LEN(A2:A1048576))}
+
+{=MAX(LEN(B2:B1048576))}
+
+{=MAX(LEN(C2:C1048576))}
+
+{=MAX(LEN(D2:D1048576))}
+
+*************************************************************
